@@ -218,3 +218,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---- Project data & outputs (not committed) ----
+data/raw/*
+data/processed/*
+outputs/figures/*
+outputs/tables/*
+outputs/model_metrics.json
+
+# Keep the directory structure
+!**/.gitkeep
