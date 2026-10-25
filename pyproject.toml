@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "churn-project"
+version = "0.1.0"
+description = "E-Commerce Customer Churn & Behaviour: Big Data analytics, RFM segmentation and ML-based churn prediction"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Mkhawana Thamelia Hleketani" },
+    { name = "Burgos Carrera, Maria de Los Angeles" },
+    { name = "Manchidi Magaseng John" },
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]

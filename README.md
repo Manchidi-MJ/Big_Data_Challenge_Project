@@ -1,155 +1,145 @@
-# E-Commerce Customer Churn & Behaviour — Big Data Project
+# E-Commerce Customer Churn & Behaviour
 
-An end-to-end **PySpark** pipeline that turns raw e-commerce customer data into
-retention insights: data engineering → exploratory analysis → **RFM
-segmentation** → **machine-learning churn prediction** → business
-recommendations.
+**Big Data Analytics, RFM Customer Segmentation and Machine Learning-Based Churn Prediction**
 
-Dataset: [E-Commerce Customer Churn 2025 – 10K (Kaggle)](https://www.kaggle.com/datasets/mohammadmaaz052/e-commerce-customer-churn-2025-10k)
-(~10,000 customer records; target `churned`, 1 = churned, 0 = retained).
+A complete, tested, reproducible university Big Data project: data engineering
+(PySpark), exploratory analysis, true RFM segmentation, a mandatory data-leakage
+audit, and leakage-aware machine-learning churn classification — built around the
+Kaggle *E-Commerce Customer Churn 2025 – 10K* dataset.
 
 ---
 
-## Research questions
+## TL;DR — the headline finding
 
-**Main:** Which customer behaviours and characteristics are most strongly
-associated with churn, and how accurately can machine learning predict whether
-a customer will churn?
+The churn label in this dataset is a **deterministic rule**:
+`churned == (days_since_last_purchase > 90)`, reproduced with **100% accuracy**
+by a single threshold. So:
 
-1. What proportion of customers churn, and how do churned and retained
-   customers differ? → **Stage 2 (EDA)**
-2. Which RFM-based segments are most at risk of churning? → **Stage 3 (RFM)**
-3. Which model predicts churn best, and which features matter most? →
-   **Stage 4 (modelling)**
+* A model that sees that field (or the purchase dates) scores ~100% — it just
+  **restates the label**, it does not predict.
+* With those fields removed, no other behaviour predicts churn (ROC-AUC ≈ 0.54,
+  barely above a majority baseline).
 
-## How the project maps to the objectives
-
-| Objective | Where it lives |
-|---|---|
-| 1. Select & document the dataset | `data/README.md` |
-| 2. Clean & preprocess; reproducible PySpark pipeline | `src/pipeline_01_data_cleaning.py`, `src/config.py` |
-| 3. EDA on churn rate & feature relationships | `src/pipeline_02_eda.py` |
-| 4. RFM segmentation & business interpretation | `src/pipeline_03_rfm.py` |
-| 5. Build & compare classifiers (precision/recall/F1/ROC-AUC) | `src/pipeline_04_churn_model.py` |
-| 6. Connect analysis + model into retention recommendations | `docs/recommendations.md` |
-| 7. Limitations & future work | `docs/limitations_and_future_work.md` |
+This project's most valuable output is the **leakage audit** and the honest,
+leakage-aware pipeline built around it. See
+[`reports/final_report.md`](reports/final_report.md).
 
 ---
 
 ## Project structure
 
 ```
-Big_Data_Challenge_Project/
-├── README.md
-├── requirements.txt
-├── Makefile
-├── data/
-│   ├── README.md                       # dataset source & download steps
-│   ├── raw/                            # put ecommerce_customer_churn_10k.csv here (git-ignored)
-│   └── processed/                      # cleaned Parquet (git-ignored)
-├── src/
-│   ├── config.py                       # all paths, schema, parameters
-│   ├── utils.py                        # Spark session + loaders
-│   ├── generate_sample_data.py         # synthetic 10K sample (schema match)
-│   ├── pipeline_01_data_cleaning.py    # Stage 1
-│   ├── pipeline_02_eda.py              # Stage 2
-│   ├── pipeline_03_rfm.py              # Stage 3
-│   ├── pipeline_04_churn_model.py      # Stage 4
-│   └── run_pipeline.py                 # run everything
-├── notebooks/
-│   └── churn_analysis.ipynb            # narrative walkthrough
-├── docs/
-│   ├── recommendations.md              # Objective 6
-│   └── limitations_and_future_work.md  # Objective 7
-└── outputs/                            # figures, tables, metrics (git-ignored)
+config/            project_config.yaml (paths, verified schema, params)
+data/              raw / interim / processed (data not committed)
+notebooks/         01 understanding, 02 cleaning (PySpark), 03 EDA+RFM, 04 modelling
+src/churn_project/ reusable modules (config, loading, validation, preprocessing,
+                   pyspark_pipeline, rfm, eda, feature_engineering, model_*, predict, run_all)
+tests/             pytest suite (synthetic fixtures only)
+outputs/           figures / tables / metrics / models (generated)
+reports/           final_report.md, references.md, data_dictionary.md
+docs/              methodology.md, limitations.md, recommendations.md
+presentation/      presentation_outline.md, build_pptx.py, final_presentation.pptx
 ```
 
 ---
 
-## Quick start
+## Requirements
+
+* Python **3.11** (tested on 3.11.9)
+* Java **17** (OpenJDK) on PATH — required by PySpark
+* See [`requirements.txt`](requirements.txt)
+
+---
+
+## Setup
 
 ```bash
-# 1. Environment (needs Java 8/11/17 for Spark + Python 3.9+)
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+# Windows:  .venv\Scripts\activate    |  macOS/Linux:  source .venv/bin/activate
 
-# 2. Get data: download the Kaggle CSV to data/raw/ecommerce_customer_churn_10k.csv
-#    (or skip — a synthetic 10K sample is auto-generated if missing)
-
-# 3. Run the whole pipeline
-python -m src.run_pipeline
+python -m pip install -r requirements.txt
+python -m pip install -e .            # install the churn_project package (src layout)
 ```
 
-Run individual stages instead:
+### Get the dataset
+
+The raw data is **not** committed. Download it from Kaggle and place it at
+`data/raw/ecommerce_customer_churn_10k.csv` — full instructions in
+[`data/README.md`](data/README.md). Dataset licence: **MIT**.
+
+---
+
+## Run the project
 
 ```bash
-python -m src.generate_sample_data --rows 10000   # optional
-python -m src.pipeline_01_data_cleaning
-python -m src.pipeline_02_eda
-python -m src.pipeline_03_rfm
-python -m src.pipeline_04_churn_model
+# Full pipeline: quality report -> PySpark cleaning -> EDA -> RFM -> leakage audit
+# -> modelling -> saved model. Writes everything under outputs/.
+python -m churn_project.run_all
+
+# Pandas-only cleaning (skip PySpark):
+python -m churn_project.run_all --no-spark
+
+# Score new customers with the saved (leakage-resistant) model:
+python -m churn_project.predict --input data/interim/sample_new_customers.csv \
+    --output outputs/tables/predictions.csv
 ```
 
-Or use the `Makefile`:
+### Notebooks
 
 ```bash
-make install   # pip install -r requirements.txt
-make data      # generate synthetic sample
-make run       # full pipeline
+python notebooks/_build_notebooks.py   # (re)generate the four notebooks
+jupyter lab                            # then run 01 -> 04
+```
+
+### Tests
+
+```bash
+python -m pytest                       # 25 tests, synthetic fixtures only
 ```
 
 ---
 
-## What each stage produces
+## What gets produced
 
-**Stage 1 — Cleaning** (`data/processed/clean/`): de-duplicated, median-imputed,
-category-normalised Parquet. Prints before/after null reports and the churn
-split.
-
-**Stage 2 — EDA** (`outputs/figures/`, `outputs/tables/`): overall churn rate,
-mean features by churn group, churn rate by `is_premium_member` / `device_type` /
-`favorite_category` / `country` / `gender`, spend & recency boxplots by churn,
-and a correlation heatmap.
-
-**Stage 3 — RFM** (`outputs/tables/rfm_segment_summary.csv`,
-`rfm_customer_segments.csv`): quartile-based R/F/M scores and segments
-(Champions / Loyal / Potential / At Risk / Lost) with churn rate per segment.
-
-**Stage 4 — Modelling** (`outputs/model_metrics.json`,
-`outputs/tables/feature_importances.csv`): Logistic Regression, Random Forest
-and GBT compared on accuracy, precision, recall, F1 and ROC-AUC, plus Random
-Forest feature importances.
+* **Metrics:** `outputs/metrics/model_comparison.csv`, `leakage_audit.json`
+* **Tables:** data-quality, EDA, RFM segment summary, cleaning logs
+  (`outputs/tables/`)
+* **Figures:** 14 PNGs (churn distribution, box plots, histograms, categorical
+  churn rates, correlation heatmap, ROC/PR curves, confusion matrices, feature
+  importance) in `outputs/figures/`
+* **Model:** `outputs/models/churn_model_experiment_B.joblib` (primary,
+  leakage-resistant)
+* **Report / presentation:** `reports/final_report.md`,
+  `presentation/final_presentation.pptx`
 
 ---
 
-## RFM mapping (true RFM)
+## Verified facts (for quick reference)
 
-This dataset has real order, recency and spend fields, so RFM is computed
-directly — no proxies needed:
-
-| RFM | Column | Direction |
-|---|---|---|
-| Recency | `days_since_last_purchase` | lower = better (recent) |
-| Frequency | `total_orders` | higher = better |
-| Monetary | `total_spent_usd` | higher = better |
-
----
-
-## "Big data" justification (10K rows)
-
-10,000 rows is modest, so Spark is justified by **pipeline design, not raw
-volume**: the same code runs unchanged from a laptop (`local[*]`) to a cluster,
-uses Spark DataFrames/MLlib and lazy evaluation, and reads/writes partitioned
-Parquet. It is a **scalable design** that would handle millions of rows without
-rewrites. This is called out honestly in the Big Data section of the report.
+| Quantity | Value |
+|---|---|
+| Dataset | Kaggle *E-Commerce Customer Churn 2025 – 10K* (MIT) |
+| Shape | 10,000 rows × 15 columns, one row per customer |
+| Missing / duplicates | none / none |
+| Churn rate | 37.71% (3,771 churned) |
+| Leakage | `churned == days_since_last_purchase > 90` (100% accuracy) |
+| Primary model (Exp B RF) | ROC-AUC 0.54, F1 0.37 — near baseline |
 
 ---
 
-## Notes before submitting
+## Honesty & scope notes
 
-- Confirm the real Kaggle column names against `src/config.py` and update if
-  they differ (Objective 1).
-- State in the write-up whether the final dataset used is real or synthetic.
-- Add real citations — especially for the "retaining customers is cheaper than
-  acquiring new ones" claim in the introduction.
+* 10k rows are **not** "big data"; PySpark demonstrates a scalable *design*.
+* Dataset provenance (real vs synthetic) **could not be confirmed**.
+* The dataset supports *describing* the current base; it does **not** support
+  honest *future* churn prediction (see `docs/limitations.md`).
+* Findings are associations, not causation. AI-assistance disclosure is in the
+  report (§25).
+
+## Team
+
+| Member | Role |
+|---|---|
+| Mkhawana Thamelia Hleketani | Data Engineer / Big Data |
+| Burgos Carrera, Maria de Los Angeles | Data Analyst / Customer Behaviour |
+| Manchidi Magaseng John | Machine Learning |

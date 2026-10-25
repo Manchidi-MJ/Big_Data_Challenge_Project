@@ -1,17 +1,31 @@
-# Core big data engine
+# =============================================================================
+# E-Commerce Customer Churn & Behaviour — Python dependencies
+# Python 3.11 recommended (tested on CPython 3.11.9, Windows + OpenJDK 17).
+#
+# IMPORTANT: PySpark 3.5.x runs its Python workers with the project interpreter.
+# NumPy 2.x works for pandas/scikit-learn here, but if you hit a PySpark worker
+# error mentioning NumPy, pin `numpy<2` (e.g. numpy==1.26.4).
+# =============================================================================
+
+# Core data stack
+pandas>=2.0,<3.0
+numpy>=1.26
+pyyaml>=6.0
+
+# Distributed processing
 pyspark==3.5.1
 
-# Data handling and numerical work (used for plotting-side conversions)
-pandas==2.2.2
-numpy==1.26.4
-
 # Visualisation
-matplotlib==3.8.4
-seaborn==0.13.2
+matplotlib>=3.7
+seaborn>=0.13
 
-# Classic ML helpers (metrics cross-checks, utilities)
-scikit-learn==1.4.2
+# Machine learning
+scikit-learn>=1.3
+joblib>=1.3
 
-# Notebook support
-jupyter==1.0.0
-ipykernel==6.29.4
+# Notebooks
+jupyter>=1.0
+nbformat>=5.9
+
+# Testing
+pytest>=7.4

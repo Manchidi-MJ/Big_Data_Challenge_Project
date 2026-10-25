@@ -1,0 +1,32 @@
+{
+  "days_since_threshold_reconstruction": {
+    "threshold": 90,
+    "accuracy": 1.0
+  },
+  "days_since_by_class": {
+    "0": {
+      "min": 1,
+      "max": 90,
+      "mean": 8.786
+    },
+    "1": {
+      "min": 91,
+      "max": 719,
+      "mean": 300.617
+    }
+  },
+  "target_correlations": {
+    "days_since_last_purchase": 0.8358,
+    "account_age_days": -0.1199,
+    "age": -0.0088,
+    "total_orders": -0.0142,
+    "total_spent_usd": -0.0088,
+    "avg_order_value": -0.0055,
+    "is_premium_member": 0.0131
+  },
+  "verdict": {
+    "days_since_last_purchase": "TARGET-DEFINING LEAKAGE",
+    "date_columns": "LEAKAGE (encode the same recency signal as days_since)",
+    "note": "Churn is a snapshot rule, not a future event. Removing recency/date fields gives a leakage-resistant but weaker and more honest model."
+  }
+}

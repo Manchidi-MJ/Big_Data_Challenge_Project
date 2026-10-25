@@ -1,0 +1,8 @@
+feature,retained_mean,churned_mean,difference
+days_since_last_purchase,8.786,300.617,291.831
+account_age_days,256.747,214.362,-42.385
+age,33.951,33.778,-0.172
+total_orders,8.044,7.169,-0.875
+total_spent_usd,315.86,306.214,-9.645
+avg_order_value,210.491,205.467,-5.024
+is_premium_member,0.14,0.15,0.01

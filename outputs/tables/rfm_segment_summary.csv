@@ -1,0 +1,7 @@
+segment,avg_recency_days,avg_frequency,avg_monetary_usd,n_customers,churn_rate,pct_customers
+Needs Attention,288.5899,4.2509,220.0696,3041,0.9421,30.41
+Loyal Customers,1.0,6.0099,256.1674,2116,0.0,21.16
+About to Sleep,16.114,7.838,295.4396,2000,0.0,20.0
+Champions,1.0,17.7824,655.6405,1048,0.0,10.48
+At Risk,286.2617,17.0125,608.8452,959,0.9447,9.59
+Potential Loyalists,1.0,1.0359,58.6937,836,0.0,8.36

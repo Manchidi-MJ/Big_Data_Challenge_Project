@@ -1,25 +1,26 @@
-.PHONY: install data run clean-all stage1 stage2 stage3 stage4
+# Convenience targets. On Windows, run the underlying python commands directly
+# if you don't have `make` (see README).
+
+.PHONY: install data-check run run-nospark test notebooks pptx clean
 
 install:
-	pip install -r requirements.txt
-
-data:
-	python -m src.generate_sample_data --rows 10000
+	python -m pip install -r requirements.txt
+	python -m pip install -e .
 
 run:
-	python -m src.run_pipeline
+	python -m churn_project.run_all
 
-stage1:
-	python -m src.pipeline_01_data_cleaning
+run-nospark:
+	python -m churn_project.run_all --no-spark
 
-stage2:
-	python -m src.pipeline_02_eda
+test:
+	python -m pytest
 
-stage3:
-	python -m src.pipeline_03_rfm
+notebooks:
+	python notebooks/_build_notebooks.py
 
-stage4:
-	python -m src.pipeline_04_churn_model
+pptx:
+	python presentation/build_pptx.py
 
-clean-all:
-	rm -rf data/processed/* outputs/figures/* outputs/tables/* outputs/model_metrics.json
+clean:
+	python -c "import shutil,os; [shutil.rmtree(p,ignore_errors=True) for p in ['outputs/figures','outputs/tables','outputs/metrics','outputs/models']]; [os.makedirs(p,exist_ok=True) for p in ['outputs/figures','outputs/tables','outputs/metrics','outputs/models']]"

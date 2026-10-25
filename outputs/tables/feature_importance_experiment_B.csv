@@ -1,0 +1,11 @@
+feature,importance_mean,importance_std
+avg_order_value,0.02373,0.0074
+account_age_days,0.02199,0.01401
+gender,0.01652,0.00843
+total_spent_usd,0.01503,0.00962
+country,0.01461,0.00672
+total_orders,0.01275,0.00429
+device_type,0.01191,0.0072
+is_premium_member,0.01169,0.00546
+age,0.01098,0.00538
+favorite_category,0.00987,0.00947

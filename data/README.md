@@ -1,57 +1,61 @@
-# Data
+# Data directory
+
+This folder holds the project data. **Raw and processed data are not committed
+to Git** (see `.gitignore`) — only the folder structure is tracked.
+
+```
+data/
+├── raw/        # original, unmodified dataset (input)
+├── interim/    # intermediate artefacts (optional)
+└── processed/  # cleaned data + RFM output produced by the pipeline
+```
 
 ## Dataset
 
-**E-Commerce Customer Churn 2025 – 10K** (Kaggle)
-<https://www.kaggle.com/datasets/mohammadmaaz052/e-commerce-customer-churn-2025-10k>
+**E-Commerce Customer Churn 2025 – 10K**
 
-- ~10,000 customer records, one row per customer.
-- Target column: `churned` (1 = churned, 0 = retained).
-- Features cover demographics, device/category preferences, membership,
-  spend, order history and purchase dates.
+| Field | Value |
+|---|---|
+| Source | Kaggle |
+| URL | <https://www.kaggle.com/datasets/mohammadmaaz052/e-commerce-customer-churn-2025-10k> |
+| Author | Mohammad Maaz (`mohammadmaaz052`) |
+| Licence | **MIT** (per Kaggle API metadata) |
+| Size on Kaggle | 207,128 bytes (zipped) |
+| File | `ecommerce_customer_churn_10k.csv` (≈ 950 KB unzipped) |
+| Rows × columns | **10,000 × 15** (verified) |
+| Target | `churned` (1 = churned, 0 = retained) |
+| Provenance (real vs synthetic) | The author provides no description. Realistic/synthetic status **could not be confirmed**. |
 
-## How to get it
+> The verified column list and meanings are in
+> [`reports/data_dictionary.md`](../reports/data_dictionary.md).
 
-1. Download the CSV from the Kaggle link above (sign in required).
-2. Rename it to `ecommerce_customer_churn_10k.csv`.
-3. Place it at `data/raw/ecommerce_customer_churn_10k.csv`.
+## How to obtain the dataset
 
-The pipeline reads from that path. No code changes are needed.
+### Option A — Manual download (no credentials needed)
 
-## Don't have the file yet?
+1. Open the Kaggle page above and sign in.
+2. Click **Download** to get the zip.
+3. Unzip it and place `ecommerce_customer_churn_10k.csv` at:
+   ```
+   data/raw/ecommerce_customer_churn_10k.csv
+   ```
 
-A synthetic sample with the **same schema** is generated automatically when
-you run the pipeline, so everything runs end-to-end for development/testing:
+### Option B — Kaggle API (optional)
 
-```bash
-python -m src.generate_sample_data --rows 10000
-```
+1. Install the CLI: `pip install kaggle`
+2. Put your `kaggle.json` token in `~/.kaggle/` (or set `KAGGLE_USERNAME` /
+   `KAGGLE_KEY`, see `.env.example`). **Never commit this token.**
+3. Run:
+   ```bash
+   kaggle datasets download -d mohammadmaaz052/e-commerce-customer-churn-2025-10k -p data/raw --unzip
+   ```
 
-> The synthetic data is for pipeline testing only. Use the real Kaggle CSV
-> for any reported results. Note in your write-up whether the final dataset
-> is real or synthetic (Objective 1).
+The pipeline reads from `data/raw/ecommerce_customer_churn_10k.csv` (configurable
+in `config/project_config.yaml`). No code changes are needed once the file is in
+place.
 
-## Columns
+## Reproducibility note
 
-| Column | Type | Notes |
-|---|---|---|
-| `customer_id` | int | Identifier (dropped before modelling) |
-| `age` | num | Customer age |
-| `gender` | cat | Male / Female / Other |
-| `country` | cat | Customer country |
-| `device_type` | cat | Mobile / Desktop / Tablet |
-| `favorite_category` | cat | Most-ordered category |
-| `is_premium_member` | int | 1 if premium member |
-| `total_spent_usd` | num | Lifetime spend — **RFM Monetary** |
-| `total_orders` | num | Lifetime orders — **RFM Frequency** |
-| `days_since_last_purchase` | num | Days since last order — **RFM Recency** |
-| `signup_date` | date | Account creation date |
-| `last_purchase_date` | date | Most recent order date |
-| `churned` | int | **Target**: 1 = churned, 0 = retained |
-
-Engineered during cleaning: `account_age_days` (from `signup_date`).
-
-> **Confirm** these columns against the downloaded file and update
-> `src/config.py` if the real names differ (Objective 1).
-
-Raw and processed data are git-ignored and are **not** committed.
+The cleaning pipeline reads only from `data/raw/` and writes to
+`data/processed/`. It never edits the raw file in place, so the full pipeline can
+be re-run from scratch at any time.

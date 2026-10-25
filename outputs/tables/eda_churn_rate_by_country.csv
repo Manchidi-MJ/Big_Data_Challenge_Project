@@ -1,0 +1,11 @@
+country,churn_rate,n_customers
+Germany,0.3983,816
+India,0.3941,1832
+France,0.3868,574
+United States,0.3777,2547
+Canada,0.3699,584
+United Kingdom,0.3698,668
+South Korea,0.369,786
+Japan,0.3648,710
+Australia,0.3646,469
+Brazil,0.3521,1014

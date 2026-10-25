@@ -1,0 +1,7 @@
+experiment,model,accuracy,precision,recall,f1,roc_auc,pr_auc,cv_f1_train
+A,RandomForest,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+A,LogisticRegression,0.9945,0.9869,0.9987,0.9927,0.9999,0.9998,0.9936
+A,DummyClassifier,0.623,0.0,0.0,0.0,0.5,0.377,0.0
+B,LogisticRegression,0.52,0.4019,0.5597,0.4678,0.5506,0.4078,0.474
+B,RandomForest,0.5615,0.4075,0.3594,0.382,0.5353,0.4105,0.3771
+B,DummyClassifier,0.623,0.0,0.0,0.0,0.5,0.377,0.0

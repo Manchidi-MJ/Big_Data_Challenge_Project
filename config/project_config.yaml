@@ -1,0 +1,99 @@
+# =============================================================================
+# Project configuration — E-Commerce Customer Churn & Behaviour
+# =============================================================================
+# This file is the single source of truth for paths, the verified dataset
+# schema, RFM settings and modelling parameters. Keeping everything here makes
+# the PySpark pipeline reproducible and easy to adapt if the Kaggle schema
+# changes in a future dataset version.
+#
+# The schema below was VERIFIED by inspecting the actual downloaded CSV on
+# 2026-01 (see reports/data_dictionary.md). It is NOT the provisional column
+# list from the original brief, which did not match the real file.
+# =============================================================================
+
+project:
+  name: "ecommerce-customer-churn"
+  title: "E-Commerce Customer Churn & Behaviour"
+  random_seed: 42
+
+paths:
+  data_raw: "data/raw"
+  data_interim: "data/interim"
+  data_processed: "data/processed"
+  raw_csv: "data/raw/ecommerce_customer_churn_10k.csv"
+  clean_parquet: "data/processed/clean"
+  clean_csv: "data/processed/clean_customers.csv"
+  rfm_csv: "data/processed/rfm_customers.csv"
+  outputs: "outputs"
+  figures: "outputs/figures"
+  tables: "outputs/tables"
+  metrics: "outputs/metrics"
+  models: "outputs/models"
+
+dataset:
+  source_name: "E-Commerce Customer Churn 2025 - 10K"
+  kaggle_url: "https://www.kaggle.com/datasets/mohammadmaaz052/e-commerce-customer-churn-2025-10k"
+  author: "mohammadmaaz052"
+  license: "MIT"
+  retrieved_date: "2026-01-01"
+  expected_rows: 10000
+  expected_cols: 15
+  is_synthetic: "unverified"   # author provides no provenance note; could not confirm
+
+# -----------------------------------------------------------------------------
+# VERIFIED schema (actual column names in the downloaded CSV)
+# -----------------------------------------------------------------------------
+schema:
+  id_col: "customer_id"
+  target: "churned"            # 1 = churned, 0 = retained
+
+  date_cols:
+    - "signup_date"
+    - "last_purchase_date"
+
+  numeric_cols:
+    - "days_since_last_purchase"
+    - "account_age_days"
+    - "age"
+    - "total_orders"
+    - "total_spent_usd"
+    - "avg_order_value"
+    - "is_premium_member"
+
+  categorical_cols:
+    - "country"
+    - "gender"
+    - "device_type"
+    - "favorite_category"
+
+  # Known inconsistent category spellings -> canonical form.
+  # (None observed in this dataset; kept so the cleaning step stays generic.)
+  category_normalisation: {}
+
+# -----------------------------------------------------------------------------
+# RFM settings — TRUE RFM is possible because the dataset has real purchase
+# recency, order counts and spend per customer.
+#   Recency   = days_since_last_purchase  (lower = more recent = better)
+#   Frequency = total_orders              (higher = better)
+#   Monetary  = total_spent_usd           (higher = better)
+# -----------------------------------------------------------------------------
+rfm:
+  recency_col: "days_since_last_purchase"
+  frequency_col: "total_orders"
+  monetary_col: "total_spent_usd"
+  n_bins: 5
+
+# -----------------------------------------------------------------------------
+# Modelling
+# -----------------------------------------------------------------------------
+modelling:
+  test_size: 0.2
+  cv_folds: 5
+  random_seed: 42
+  # Columns that DIRECTLY DEFINE the churn label (leakage). The label is
+  # exactly (days_since_last_purchase > 90). last_purchase_date encodes the
+  # same signal because days_since = snapshot_date - last_purchase_date.
+  leakage_cols:
+    - "days_since_last_purchase"
+    - "last_purchase_date"
+    - "signup_date"          # dropped: raw date, used only to derive features

@@ -1,0 +1,4 @@
+device_type,churn_rate,n_customers
+Desktop,0.3855,2988
+Tablet,0.3786,486
+Mobile,0.3731,6526

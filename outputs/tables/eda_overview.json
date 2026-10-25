@@ -1,0 +1,8 @@
+{
+  "total_customers": 10000,
+  "churned": 3771,
+  "retained": 6229,
+  "churn_rate": 0.3771,
+  "retained_rate": 0.6229,
+  "imbalance_ratio_majority_to_minority": 1.652
+}

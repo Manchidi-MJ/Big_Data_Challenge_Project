@@ -1,0 +1,24 @@
+{
+  "steps": [
+    "read raw CSV with explicit schema",
+    "parsed date columns to DateType",
+    "dropped fully-duplicated rows",
+    "filtered rows to valid target values {0,1}",
+    "trimmed categorical strings",
+    "wrote cleaned single CSV (and Parquet where supported)"
+  ],
+  "before": {
+    "n_rows": 10000,
+    "duplicate_rows": 0,
+    "duplicate_customer_ids": 0
+  },
+  "imputed_cells": {},
+  "after": {
+    "n_rows": 10000,
+    "duplicate_rows": 0,
+    "duplicate_customer_ids": 0
+  },
+  "parquet_path": null,
+  "parquet_status": "skipped (native Hadoop write unavailable on this platform: Py4JJavaError). CSV output is the canonical cleaned dataset.",
+  "csv_path": "C:\\Users\\johnm\\Big_Data_Challenge_Project\\data/processed/clean_customers.csv"
+}

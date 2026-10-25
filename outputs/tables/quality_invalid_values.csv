@@ -1,0 +1,9 @@
+column,rule,n_violations
+age,age < 0 or age > 120,0
+days_since_last_purchase,negative,0
+account_age_days,negative,0
+total_orders,negative,0
+total_spent_usd,negative,0
+avg_order_value,negative,0
+is_premium_member,"not in {0,1}",0
+churned,"not in {0,1}",0

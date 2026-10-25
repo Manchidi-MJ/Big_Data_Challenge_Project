@@ -1,0 +1,87 @@
+{
+  "n_rows": 10000,
+  "n_cols": 15,
+  "churn_overview": {
+    "total_customers": 10000,
+    "churned": 3771,
+    "retained": 6229,
+    "churn_rate": 0.3771,
+    "retained_rate": 0.6229,
+    "imbalance_ratio_majority_to_minority": 1.652
+  },
+  "rfm_segments": 6,
+  "leakage_verdict": {
+    "days_since_last_purchase": "TARGET-DEFINING LEAKAGE",
+    "date_columns": "LEAKAGE (encode the same recency signal as days_since)",
+    "note": "Churn is a snapshot rule, not a future event. Removing recency/date fields gives a leakage-resistant but weaker and more honest model."
+  },
+  "model_comparison": [
+    {
+      "experiment": "A",
+      "model": "RandomForest",
+      "accuracy": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "pr_auc": 1.0,
+      "cv_f1_train": 1.0
+    },
+    {
+      "experiment": "A",
+      "model": "LogisticRegression",
+      "accuracy": 0.9945,
+      "precision": 0.9869,
+      "recall": 0.9987,
+      "f1": 0.9927,
+      "roc_auc": 0.9999,
+      "pr_auc": 0.9998,
+      "cv_f1_train": 0.9936
+    },
+    {
+      "experiment": "A",
+      "model": "DummyClassifier",
+      "accuracy": 0.623,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5,
+      "pr_auc": 0.377,
+      "cv_f1_train": 0.0
+    },
+    {
+      "experiment": "B",
+      "model": "LogisticRegression",
+      "accuracy": 0.52,
+      "precision": 0.4019,
+      "recall": 0.5597,
+      "f1": 0.4678,
+      "roc_auc": 0.5506,
+      "pr_auc": 0.4078,
+      "cv_f1_train": 0.474
+    },
+    {
+      "experiment": "B",
+      "model": "RandomForest",
+      "accuracy": 0.5615,
+      "precision": 0.4075,
+      "recall": 0.3594,
+      "f1": 0.382,
+      "roc_auc": 0.5353,
+      "pr_auc": 0.4105,
+      "cv_f1_train": 0.3771
+    },
+    {
+      "experiment": "B",
+      "model": "DummyClassifier",
+      "accuracy": 0.623,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5,
+      "pr_auc": 0.377,
+      "cv_f1_train": 0.0
+    }
+  ],
+  "primary_model": "C:\\Users\\johnm\\Big_Data_Challenge_Project\\outputs/models\\churn_model_experiment_B.joblib"
+}

@@ -1,0 +1,20 @@
+{
+  "recency_field": "days_since_last_purchase",
+  "frequency_field": "total_orders",
+  "monetary_field": "total_spent_usd",
+  "n_bins_requested": 5,
+  "n_bins_used": {
+    "R": 5,
+    "F": 5,
+    "M": 5
+  },
+  "recency_direction": "lower days_since_last_purchase -> higher R score",
+  "segment_rules": {
+    "Champions": "recent (high R) AND high frequency+monetary",
+    "Loyal Customers": "recent AND mid frequency+monetary",
+    "Potential Loyalists": "recent AND low frequency+monetary",
+    "At Risk": "not recent (low R) AND high frequency+monetary",
+    "Needs Attention": "not recent AND low frequency+monetary",
+    "About to Sleep": "mid recency, everything else"
+  }
+}
