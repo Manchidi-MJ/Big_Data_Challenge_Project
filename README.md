@@ -6,7 +6,7 @@ segmentation** → **machine-learning churn prediction** → business
 recommendations.
 
 Dataset: [E-Commerce Customer Churn 2025 – 10K (Kaggle)](https://www.kaggle.com/datasets/mohammadmaaz052/e-commerce-customer-churn-2025-10k)
-(~10,000 customer records; target `Churn`, 1 = churned, 0 = retained).
+(~10,000 customer records; target `churned`, 1 = churned, 0 = retained).
 
 ---
 
@@ -45,7 +45,7 @@ Big_Data_Challenge_Project/
 ├── Makefile
 ├── data/
 │   ├── README.md                       # dataset source & download steps
-│   ├── raw/                            # put ecommerce_churn.csv here (git-ignored)
+│   ├── raw/                            # put ecommerce_customer_churn_10k.csv here (git-ignored)
 │   └── processed/                      # cleaned Parquet (git-ignored)
 ├── src/
 │   ├── config.py                       # all paths, schema, parameters
@@ -74,7 +74,7 @@ python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-# 2. Get data: download the Kaggle CSV to data/raw/ecommerce_churn.csv
+# 2. Get data: download the Kaggle CSV to data/raw/ecommerce_customer_churn_10k.csv
 #    (or skip — a synthetic 10K sample is auto-generated if missing)
 
 # 3. Run the whole pipeline
@@ -108,9 +108,9 @@ category-normalised Parquet. Prints before/after null reports and the churn
 split.
 
 **Stage 2 — EDA** (`outputs/figures/`, `outputs/tables/`): overall churn rate,
-mean features by churn group, churn rate by `Complain` / `SatisfactionScore` /
-`MaritalStatus` / `PreferedOrderCat` / `CityTier`, tenure distribution, and a
-correlation heatmap.
+mean features by churn group, churn rate by `is_premium_member` / `device_type` /
+`favorite_category` / `country` / `gender`, spend & recency boxplots by churn,
+and a correlation heatmap.
 
 **Stage 3 — RFM** (`outputs/tables/rfm_segment_summary.csv`,
 `rfm_customer_segments.csv`): quartile-based R/F/M scores and segments
@@ -123,16 +123,16 @@ Forest feature importances.
 
 ---
 
-## RFM proxy mapping
+## RFM mapping (true RFM)
 
-This dataset has **no transaction timestamps**, so classic RFM uses the closest
-available proxies (stated openly in the write-up):
+This dataset has real order, recency and spend fields, so RFM is computed
+directly — no proxies needed:
 
-| RFM | Proxy column | Direction |
+| RFM | Column | Direction |
 |---|---|---|
-| Recency | `DaySinceLastOrder` | lower = better (recent) |
-| Frequency | `OrderCount` | higher = better |
-| Monetary | `CashbackAmount` | higher = better (spend proxy) |
+| Recency | `days_since_last_purchase` | lower = better (recent) |
+| Frequency | `total_orders` | higher = better |
+| Monetary | `total_spent_usd` | higher = better |
 
 ---
 

@@ -57,12 +57,13 @@ def main() -> None:
             palette="Set2", legend=False,
         )
         plt.title("Churn distribution (0 = retained, 1 = churned)")
-        plt.xlabel("Churn")
+        plt.xlabel("Churned")
         plt.ylabel("Customers")
         _savefig("01_churn_distribution.png")
 
         # --- Numeric comparison: churned vs retained ------------------------
-        num_cols = [c for c in config.NUMERIC_COLS if c in df.columns]
+        num_cols = [c for c in (config.NUMERIC_COLS + config.ENGINEERED_NUMERIC_COLS)
+                    if c in df.columns]
         means = (
             df.groupBy(config.TARGET)
             .agg(*[F.round(F.avg(c), 2).alias(c) for c in num_cols])
@@ -73,9 +74,9 @@ def main() -> None:
         print("\nMean of numeric features by churn group:")
         print(means.to_string(index=False))
 
-        # --- Churn rate by selected categorical / ordinal drivers -----------
-        for col in ["Complain", "SatisfactionScore", "MaritalStatus",
-                    "PreferedOrderCat", "CityTier"]:
+        # --- Churn rate by categorical / membership drivers -----------------
+        for col in ["is_premium_member", "device_type", "favorite_category",
+                    "country", "gender"]:
             if col not in df.columns:
                 continue
             rate = (
@@ -90,34 +91,39 @@ def main() -> None:
             save_pandas_csv(rate, f"churn_rate_by_{col}.csv")
 
             plt.figure(figsize=(6, 4))
-            order = rate[col].astype(str).tolist()
+            rate_plot = rate.assign(**{col: rate[col].astype(str)})
             sns.barplot(
-                data=rate.assign(**{col: rate[col].astype(str)}),
-                x=col, y="churn_rate_pct", hue=col, palette="Set2",
-                legend=False, order=order,
+                data=rate_plot, x=col, y="churn_rate_pct", hue=col,
+                palette="Set2", legend=False,
+                order=rate_plot[col].tolist(),
             )
             plt.title(f"Churn rate by {col}")
             plt.ylabel("Churn rate (%)")
             plt.xticks(rotation=30, ha="right")
             _savefig(f"02_churn_rate_by_{col}.png")
 
-        # --- Tenure distribution split by churn -----------------------------
-        if "Tenure" in df.columns:
-            pdf = df.select("Tenure", config.TARGET).toPandas()
-            plt.figure(figsize=(7, 4))
-            sns.histplot(
-                data=pdf, x="Tenure", hue=config.TARGET, bins=30,
-                element="step", stat="density", common_norm=False, palette="Set2",
+        # --- Spend & recency by churn (classic behaviour signals) -----------
+        for col in ["total_spent_usd", "days_since_last_purchase",
+                    "total_orders", "age"]:
+            if col not in df.columns:
+                continue
+            pdf = df.select(col, config.TARGET).toPandas()
+            plt.figure(figsize=(6, 4))
+            sns.boxplot(
+                data=pdf, x=config.TARGET, y=col, hue=config.TARGET,
+                palette="Set2", legend=False,
             )
-            plt.title("Tenure distribution: churned vs retained")
-            _savefig("03_tenure_by_churn.png")
+            plt.title(f"{col} by churn status")
+            plt.xlabel("Churned")
+            _savefig(f"03_{col}_by_churn.png")
 
         # --- Correlation heatmap of numeric features ------------------------
-        corr_pdf = df.select(num_cols + [config.TARGET]).toPandas()
-        plt.figure(figsize=(10, 8))
+        corr_cols = num_cols + [config.TARGET]
+        corr_pdf = df.select(corr_cols).toPandas()
+        plt.figure(figsize=(9, 7))
         sns.heatmap(
-            corr_pdf.corr(numeric_only=True), annot=False, cmap="coolwarm",
-            center=0, linewidths=0.4,
+            corr_pdf.corr(numeric_only=True), annot=True, cmap="coolwarm",
+            center=0, fmt=".2f", linewidths=0.4,
         )
         plt.title("Correlation matrix (numeric features + churn)")
         _savefig("04_correlation_heatmap.png")

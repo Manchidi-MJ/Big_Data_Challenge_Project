@@ -48,7 +48,7 @@ sns.set_theme(style="whitegrid")
 def build_feature_stages():
     """Indexing + one-hot for categoricals, assemble + scale all features."""
     cat_cols = [c for c in config.CATEGORICAL_COLS]
-    num_cols = [c for c in config.NUMERIC_COLS]
+    num_cols = [c for c in (config.NUMERIC_COLS + config.ENGINEERED_NUMERIC_COLS)]
 
     indexers = [
         StringIndexer(inputCol=c, outputCol=f"{c}_idx", handleInvalid="keep")
@@ -95,10 +95,11 @@ def main() -> None:
     try:
         df = load_clean(spark)
         # Drop any columns not present to stay robust to schema differences.
-        config_cat = [c for c in config.CATEGORICAL_COLS if c in df.columns]
-        config_num = [c for c in config.NUMERIC_COLS if c in df.columns]
-        config.CATEGORICAL_COLS = config_cat
-        config.NUMERIC_COLS = config_num
+        config.CATEGORICAL_COLS = [c for c in config.CATEGORICAL_COLS if c in df.columns]
+        config.NUMERIC_COLS = [c for c in config.NUMERIC_COLS if c in df.columns]
+        config.ENGINEERED_NUMERIC_COLS = [
+            c for c in config.ENGINEERED_NUMERIC_COLS if c in df.columns
+        ]
 
         feature_stages, assembler_inputs, cat_cols, num_cols = build_feature_stages()
 

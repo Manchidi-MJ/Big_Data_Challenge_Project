@@ -1,17 +1,17 @@
 """
 Stage 1 - Data engineering & cleaning (Objective 2).
 
-Reads the raw Kaggle CSV with PySpark, standardises categories, imputes
-missing numeric values with the median, removes duplicates, and writes a
-cleaned Parquet dataset for the downstream stages.
+Reads the raw Kaggle CSV with PySpark, parses dates, engineers account age,
+imputes missing numeric values with the median, removes duplicates, and
+writes a cleaned Parquet dataset for the downstream stages.
 
 Usage:
     python -m src.pipeline_01_data_cleaning
 """
 from __future__ import annotations
 
-import shutil
 import os
+import shutil
 
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
@@ -20,8 +20,32 @@ from . import config
 from .utils import get_spark, load_raw, null_report, ensure_dirs
 
 
+def parse_dates(df: DataFrame) -> DataFrame:
+    """Cast date columns to date type (handles common string formats)."""
+    for col in config.DATE_COLS:
+        if col in df.columns:
+            df = df.withColumn(col, F.to_date(F.col(col)))
+    return df
+
+
+def engineer_features(df: DataFrame) -> DataFrame:
+    """Add account_age_days = (max signup_date) - signup_date, in days.
+
+    Uses the latest signup date in the data as the reference 'today', mirroring
+    the notebook's approach and keeping the feature reproducible.
+    """
+    if "signup_date" in df.columns:
+        ref = df.agg(F.max("signup_date").alias("m")).first()["m"]
+        if ref is not None:
+            df = df.withColumn(
+                "account_age_days",
+                F.datediff(F.lit(ref), F.col("signup_date")),
+            )
+    return df
+
+
 def normalise_categories(df: DataFrame) -> DataFrame:
-    """Fix known inconsistent category spellings (e.g. 'CC' -> 'Credit Card')."""
+    """Fix known inconsistent spellings and trim whitespace on strings."""
     for col, mapping in config.CATEGORY_NORMALISATION.items():
         if col not in df.columns:
             continue
@@ -29,7 +53,6 @@ def normalise_categories(df: DataFrame) -> DataFrame:
         for raw, canonical in mapping.items():
             expr = F.when(F.col(col) == raw, F.lit(canonical)).otherwise(expr)
         df = df.withColumn(col, expr)
-    # Trim stray whitespace on all string columns.
     for col, dtype in df.dtypes:
         if dtype == "string":
             df = df.withColumn(col, F.trim(F.col(col)))
@@ -48,9 +71,10 @@ def impute_median(df: DataFrame) -> DataFrame:
 
 def clean(df: DataFrame) -> DataFrame:
     df = df.dropDuplicates()
+    df = parse_dates(df)
     df = normalise_categories(df)
     df = impute_median(df)
-    # Ensure the target is an integer 0/1.
+    df = engineer_features(df)
     if config.TARGET in df.columns:
         df = df.withColumn(config.TARGET, F.col(config.TARGET).cast("int"))
     return df
@@ -62,6 +86,7 @@ def main() -> None:
     try:
         raw = load_raw(spark)
         print(f"Raw rows: {raw.count():,} | columns: {len(raw.columns)}")
+        print("Columns:", raw.columns)
 
         print("\nNull counts BEFORE cleaning:")
         null_report(raw).show(vertical=True, truncate=False)
@@ -76,7 +101,6 @@ def main() -> None:
             print("\nChurn distribution:")
             cleaned.groupBy(config.TARGET).count().orderBy(config.TARGET).show()
 
-        # Overwrite any previous clean output.
         if os.path.exists(config.CLEAN_PARQUET):
             shutil.rmtree(config.CLEAN_PARQUET)
         cleaned.write.mode("overwrite").parquet(config.CLEAN_PARQUET)

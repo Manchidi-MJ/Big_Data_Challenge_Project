@@ -2,7 +2,7 @@
 Run the full pipeline end-to-end:
     1. data cleaning  ->  2. EDA  ->  3. RFM segmentation  ->  4. churn model
 
-If data/raw/ecommerce_churn.csv is missing, a synthetic 10K sample is
+If data/raw/ecommerce_customer_churn_10k.csv is missing, a synthetic 10K sample is
 generated first so the pipeline always runs. Replace that file with the real
 Kaggle CSV for the final results.
 

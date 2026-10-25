@@ -6,15 +6,15 @@
 <https://www.kaggle.com/datasets/mohammadmaaz052/e-commerce-customer-churn-2025-10k>
 
 - ~10,000 customer records, one row per customer.
-- Target column: `Churn` (1 = churned, 0 = retained).
-- Features cover engagement/behaviour, account details, demographics and
-  platform preferences.
+- Target column: `churned` (1 = churned, 0 = retained).
+- Features cover demographics, device/category preferences, membership,
+  spend, order history and purchase dates.
 
 ## How to get it
 
 1. Download the CSV from the Kaggle link above (sign in required).
-2. Rename it to `ecommerce_churn.csv`.
-3. Place it at `data/raw/ecommerce_churn.csv`.
+2. Rename it to `ecommerce_customer_churn_10k.csv`.
+3. Place it at `data/raw/ecommerce_customer_churn_10k.csv`.
 
 The pipeline reads from that path. No code changes are needed.
 
@@ -31,32 +31,27 @@ python -m src.generate_sample_data --rows 10000
 > for any reported results. Note in your write-up whether the final dataset
 > is real or synthetic (Objective 1).
 
-## Expected columns
+## Columns
 
 | Column | Type | Notes |
 |---|---|---|
-| `CustomerID` | int | Identifier (dropped before modelling) |
-| `Churn` | int | **Target**: 1 = churned, 0 = retained |
-| `Tenure` | num | Months with the platform |
-| `PreferredLoginDevice` | cat | e.g. Phone, Computer |
-| `CityTier` | int | 1 / 2 / 3 |
-| `WarehouseToHome` | num | Distance warehouse→home |
-| `PreferredPaymentMode` | cat | e.g. Credit Card, UPI, COD |
-| `Gender` | cat | Male / Female |
-| `HourSpendOnApp` | num | Hours spent on app/website |
-| `NumberOfDeviceRegistered` | int | Devices registered |
-| `PreferedOrderCat` | cat | Preferred order category |
-| `SatisfactionScore` | int | 1–5 |
-| `MaritalStatus` | cat | Single / Married / Divorced |
-| `NumberOfAddress` | int | Saved addresses |
-| `Complain` | int | 1 if complained recently |
-| `OrderAmountHikeFromlastYear` | num | % order-value increase YoY |
-| `CouponUsed` | num | Coupons used |
-| `OrderCount` | num | Orders placed |
-| `DaySinceLastOrder` | num | Days since last order |
-| `CashbackAmount` | num | Cashback received (spend proxy) |
+| `customer_id` | int | Identifier (dropped before modelling) |
+| `age` | num | Customer age |
+| `gender` | cat | Male / Female / Other |
+| `country` | cat | Customer country |
+| `device_type` | cat | Mobile / Desktop / Tablet |
+| `favorite_category` | cat | Most-ordered category |
+| `is_premium_member` | int | 1 if premium member |
+| `total_spent_usd` | num | Lifetime spend — **RFM Monetary** |
+| `total_orders` | num | Lifetime orders — **RFM Frequency** |
+| `days_since_last_purchase` | num | Days since last order — **RFM Recency** |
+| `signup_date` | date | Account creation date |
+| `last_purchase_date` | date | Most recent order date |
+| `churned` | int | **Target**: 1 = churned, 0 = retained |
+
+Engineered during cleaning: `account_age_days` (from `signup_date`).
 
 > **Confirm** these columns against the downloaded file and update
-> `src/config.py` if the real names differ (Objective 1 / "points to check").
+> `src/config.py` if the real names differ (Objective 1).
 
 Raw and processed data are git-ignored and are **not** committed.

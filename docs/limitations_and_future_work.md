@@ -6,9 +6,10 @@
 - **Scale vs "big data".** The dataset is ~10,000 rows. Spark is justified by
   scalable *design*, not data volume; genuinely large data would be needed to
   demonstrate performance benefits.
-- **No transaction timestamps.** Classic RFM is approximated with proxies
-  (`DaySinceLastOrder`, `OrderCount`, `CashbackAmount`). True recency/frequency
-  from an event log would be more faithful.
+- **Aggregated, not event-level.** RFM uses the dataset's summary fields
+  (`days_since_last_purchase`, `total_orders`, `total_spent_usd`) rather than a
+  full transaction log. This gives genuine RFM, but a per-order event log would
+  allow richer behaviour features (inter-purchase intervals, basket trends).
 - **Possibly synthetic / curated.** Confirm the dataset's provenance; a
   synthetic or heavily curated set may show cleaner relationships than
   real-world data. State this in the write-up (Objective 1).

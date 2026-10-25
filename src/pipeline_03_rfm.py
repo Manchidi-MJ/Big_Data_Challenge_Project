@@ -1,11 +1,10 @@
 """
 Stage 3 - RFM segmentation (Objective 4; answers supporting Q2).
 
-The Kaggle churn dataset has no transaction-level timestamps, so classic RFM
-is approximated with the closest available proxies:
-    Recency   = DaySinceLastOrder  (lower is better -> reversed score)
-    Frequency = OrderCount         (higher is better)
-    Monetary  = CashbackAmount     (higher is better, spend proxy)
+This dataset has real order/recency/spend fields, so this is TRUE RFM:
+    Recency   = days_since_last_purchase  (lower is better -> reversed score)
+    Frequency = total_orders              (higher is better)
+    Monetary  = total_spent_usd           (higher is better)
 
 Each dimension is scored 1-4 using quartiles (ntile). Customers are then
 grouped into business segments and each segment's churn rate is reported.
@@ -34,7 +33,7 @@ sns.set_theme(style="whitegrid")
 
 def add_rfm_scores(df):
     """Add R, F, M quartile scores (1-4) and a combined RFM score."""
-    # Recency: lower DaySinceLastOrder is better -> ascending ntile then reverse.
+    # Recency: lower days_since_last_purchase is better -> ascending ntile then reverse.
     r_win = Window.orderBy(F.col(config.RFM_RECENCY).asc())
     f_win = Window.orderBy(F.col(config.RFM_FREQUENCY).asc())
     m_win = Window.orderBy(F.col(config.RFM_MONETARY).asc())
